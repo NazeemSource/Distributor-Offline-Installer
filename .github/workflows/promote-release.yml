@@ -25,6 +25,7 @@ jobs:
             --pattern 'SH.DistributorOffline-win.msi' \
             --pattern 'SH.DistributorOffline-win-Setup.exe' \
             --dir assets
+          ls -lh assets
 
       - name: Upload and publish public release
         env:
@@ -32,6 +33,7 @@ jobs:
         run: |
           gh release upload "${{ inputs.version }}" \
             assets/SH.DistributorOffline-win.msi \
-            assets/SH.DistributorOffline-win-Setup.exe --clobber
-          gh release edit "${{ inputs.version }}" --draft=false --latest
-          gh release view "${{ inputs.version }}" --json tagName,isDraft,assets
+            assets/SH.DistributorOffline-win-Setup.exe \
+            --repo NazeemSource/Distributor-Offline-Installer --clobber
+          gh release edit "${{ inputs.version }}" --repo NazeemSource/Distributor-Offline-Installer --draft=false --latest
+          gh release view "${{ inputs.version }}" --repo NazeemSource/Distributor-Offline-Installer --json tagName,isDraft,assets
