@@ -1,0 +1,39 @@
+name: Promote release assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release tag to promote
+        required: true
+        default: v1.1.14
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download private release assets
+        env:
+          GH_TOKEN: ${{ secrets.SOURCE_REPO_TOKEN }}
+        run: |
+          mkdir -p assets
+          gh release download "${{ inputs.version }}" \
+            --repo NazeemSource/Distributor-offline \
+            --pattern 'SH.DistributorOffline-win.msi' \
+            --pattern 'SH.DistributorOffline-win-Setup.exe' \
+            --dir assets
+          ls -lh assets
+
+      - name: Upload and publish public release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ inputs.version }}" \
+            assets/SH.DistributorOffline-win.msi \
+            assets/SH.DistributorOffline-win-Setup.exe \
+            --repo NazeemSource/Distributor-Offline-Installer --clobber
+          gh release edit "${{ inputs.version }}" --repo NazeemSource/Distributor-Offline-Installer --draft=false --latest
+          gh release view "${{ inputs.version }}" --repo NazeemSource/Distributor-Offline-Installer --json tagName,isDraft,assets
